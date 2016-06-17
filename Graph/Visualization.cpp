@@ -60,6 +60,7 @@ void CVisualization::Update()
 	else
 	{
 		m_imageLoaded = true;
+		m_sprite.setFillColor(sf::Color::Red);
 		m_sprite.setSize({ float(m_texture.getSize().x), float(m_texture.getSize().y) });
 		m_sprite.setOrigin(sf::Vector2f({ m_sprite.getGlobalBounds().width, m_sprite.getGlobalBounds().height }) * 0.5f);
 		m_sprite.setTexture(&m_texture);

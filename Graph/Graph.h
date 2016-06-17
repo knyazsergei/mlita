@@ -27,6 +27,7 @@ public:
 private:
 	void SetRoad(unsigned from, unsigned to, unsigned cost);
 	void DetermineMaximumLoad();
+	std::string FormalizeStr(std::string str);
 
 	std::vector<int> m_nodes;
 	size_t m_countCities;
@@ -35,5 +36,8 @@ private:
 	std::shared_ptr<CVisualization> m_visualization;
 
 	std::string fileName = "g.dot";
+
+	size_t m_step = 0;
+	std::set<std::pair<unsigned, unsigned>> m_ref;
 };
 

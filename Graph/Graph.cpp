@@ -122,25 +122,33 @@ void CGraph::WriteDot(const std::string & styles, unsigned timer)
 	 }
 	 */
 	std::cout << "next" << m_edges.size() << "\n";
-	std::set<std::pair<unsigned, unsigned>> ref;
+	
 	std::ofstream out(fileName);
-	out << "graph mygraph{\n";
-	out << "node [shape=doublecircle]; 1 ;\n";
-	out << styles;
-	out << "node [shape=circle];\n";
+	out << "graph mygraph{\n"
+		<< "fontpath=\"./Font/\";\n"
+		<< "fontname=\"DroidSansMonoSlashed.ttf\";\n"
+		<< "1 [shape=doublecircle,label =" + FormalizeStr("1") + "];\n"
+		<< styles
+		<< "node [shape=circle, fixedsize = true, width = 0.75, height = 0.75];\n";
 	for (size_t i = 0; i < m_nodes.size();i++)
 	{
 		if (i != 0)
-			out << i + 1 << " [ label = \"" << std::to_string(i + 1) << ":" << std::to_string(m_nodes[i]) << "\" ];\n";
+			out << i + 1 << " [ label = " << FormalizeStr(std::to_string(i + 1) + ":" + std::to_string(m_nodes[i])) << ",shape=circle, fixedsize = true, width = 0.75, height = 0.75 ];\n";
 	}
 	for (auto it : m_edges)
 	{
 		for (auto road : it.second.m_road)
 		{
-			if (ref.find({ it.first, road.first }) == ref.end())
+			if (m_ref.find({ it.first, road.first }) == m_ref.end())
 			{
-				out << it.first + 1 << "--" << road.first + 1 << "[label = " << road.second << " ] " << '\n';
-				ref.insert({ road.first, it.first });
+				std::string filled = "";
+				if (it.second.visited)
+				{
+					out << it.first + 1 << "[color=deepskyblue];\n";
+					filled = ", color=deepskyblue";
+				}
+				out << it.first + 1 << "--" << road.first + 1 << "[label = " << std::to_string(road.second) << filled << " ];\n";
+				m_ref.insert({ road.first, it.first });
 			}
 		}
 		out << '\n';
@@ -148,7 +156,10 @@ void CGraph::WriteDot(const std::string & styles, unsigned timer)
 	out << "}\n";
 	out << std::endl;
 	system("dot g.dot -Tpng -og.png");
+	system(std::string("dot g.dot -Tpng -o \"steps/" + std::to_string(m_step) + ".png").c_str());
+	m_step++;
 	m_visualization->Update();
+	m_ref.clear();
 	Sleep(timer);
 }
 
@@ -174,15 +185,13 @@ void CGraph::DetermineMaximumLoad()
 	//Пока очередь не пуста
 	while (!pq.empty())
 	{
-		std::string styles;
-		for (auto it : pq)
-		{
-			styles.append( std::to_string(it) + " [color=\"0.650 0.700 0.700\"];\n");
-		}
-		std::cout << styles;
+		auto & current = pq.front();
+
+		std::string styles = std::to_string(current + 1) + " [color=bisque2];\n";
+		//std::cout << styles;
 		WriteDot(styles);
 		
-		auto & current = pq.front();
+		
 
 		//Обходим все смежные вершины
 		m_visualization->SetState("Go around all adjacent city");
@@ -190,7 +199,11 @@ void CGraph::DetermineMaximumLoad()
 		{
 			if (!m_edges[it.first].visited)
 			{
-				std::string style = std::to_string(it.first) + " [ shape = Mdiamond, style = filled, color = salmon2];\n";
+				std::string style = std::to_string(it.first + 1) + " [shape=circle, color = blue];\n" + styles;
+				style += std::to_string(current + 1) + " -- " + std::to_string(it.first + 1) + "[color=bisque2, label = " + std::to_string(it.second) + "];\n";
+				m_ref.insert({ current, it.first });
+				m_ref.insert({ it.first, current });
+
 				WriteDot(style, 1500);
 				//Если максимальная грузоподъемность города была меньше нынешней дороги, то приравниваем её
 				if (m_nodes[it.first] < it.second)
@@ -205,4 +218,39 @@ void CGraph::DetermineMaximumLoad()
 		pq.pop_front();
 		WriteDot("");
 	}
+}
+
+std::string CGraph::FormalizeStr(std::string str)
+{
+	std::string result = str;
+	auto countOfChars = 6;
+	if (str.size() < countOfChars)
+	{
+		char space = ' ';
+		auto spaces = countOfChars - str.size();
+		size_t left;
+		size_t right;
+		
+		if (spaces % 2)
+		{
+			left = ceil(spaces / 2);
+			right = spaces - left;
+		}
+		else
+		{
+			left = spaces / 2;
+			right = left;
+		}
+		
+		for (size_t i = 0; i < left;++i)
+		{
+			result = space + result;
+		}
+		for (size_t i = 0; i < right;++i)
+		{
+			result += space;
+		}
+	}
+	result = "\"" + result + "\"";
+	return result;
 }
