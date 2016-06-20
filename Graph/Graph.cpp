@@ -120,9 +120,7 @@ void CGraph::WriteDot(const std::string & styles, unsigned timer)
 		 a -- b -- c;
 		 b -- d;
 	 }
-	 */
-	std::cout << "next" << m_edges.size() << "\n";
-	
+	 */	
 	std::ofstream out(fileName);
 	out << "graph mygraph{\n"
 		<< "fontpath=\"./Font/\";\n"

@@ -25,7 +25,7 @@ private:
 
 	CAppMenu m_appMenu;
 	sf::Texture m_texture;
-	sf::RectangleShape m_sprite;
+	sf::Sprite m_sprite;
 	bool m_imageLoaded = false;
 
 	sf::View m_view;

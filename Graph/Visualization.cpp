@@ -51,8 +51,8 @@ void CVisualization::Update()
 			m_dragging = false;
 		}
 	}
-	
-	if (!m_texture.loadFromFile("g.png"))
+	sf::Image img;
+	if (!img.loadFromFile("g.png"))
 	{	
 		std::cout << "failed image loading\n";
 		m_imageLoaded = false;
@@ -60,10 +60,13 @@ void CVisualization::Update()
 	else
 	{
 		m_imageLoaded = true;
-		m_sprite.setFillColor(sf::Color::Red);
-		m_sprite.setSize({ float(m_texture.getSize().x), float(m_texture.getSize().y) });
+		
+		m_texture.loadFromImage(img);
+		m_sprite = sf::Sprite();
+		m_sprite.setTexture(m_texture);
+		m_sprite.setPosition(sf::Vector2f(m_window->getSize().x, m_window->getSize().y)  * 0.5f);
 		m_sprite.setOrigin(sf::Vector2f({ m_sprite.getGlobalBounds().width, m_sprite.getGlobalBounds().height }) * 0.5f);
-		m_sprite.setTexture(&m_texture);
+		m_texture.loadFromFile("g.png");
 	}
 	m_window->clear({ 255, 255, 255 });
 	DrawObjects();
